@@ -1,0 +1,1575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proposal — Printing Press Management System | Odoo Enterprise v19</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+        :root {
+            --primary: #0f172a;
+            --primary-light: #1e293b;
+            --primary-mid: #334155;
+            --accent: #0891b2;
+            --accent-dark: #0e7490;
+            --accent-light: #ecfeff;
+            --green: #059669;
+            --green-light: #d1fae5;
+            --orange: #d97706;
+            --orange-light: #fef3c7;
+            --red: #dc2626;
+            --bg: #f8fafc;
+            --bg-white: #ffffff;
+            --text: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.06), 0 2px 4px -2px rgba(0,0,0,0.04);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -4px rgba(0,0,0,0.03);
+            --radius: 10px;
+            --radius-lg: 14px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.65;
+            font-size: 14px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ═══════════════ COVER ═══════════════ */
+        .cover {
+            min-height: 100vh;
+            background: var(--primary);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            padding: 80px 40px;
+            position: relative;
+            overflow: hidden;
+            page-break-after: always;
+        }
+
+        .cover::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(8,145,178,0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(8,145,178,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 100%, rgba(8,145,178,0.1) 0%, transparent 40%);
+        }
+
+        /* Subtle grid pattern */
+        .cover::after {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        .cover-content {
+            position: relative;
+            z-index: 1;
+            max-width: 720px;
+        }
+
+        .cover-badge {
+            display: inline-block;
+            background: rgba(8,145,178,0.15);
+            border: 1px solid rgba(8,145,178,0.3);
+            padding: 6px 20px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 48px;
+            color: #67e8f9;
+        }
+
+        .cover h1 {
+            font-size: 52px;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 16px;
+            letter-spacing: -1.5px;
+        }
+
+        .cover h1 span {
+            background: linear-gradient(135deg, #67e8f9, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .cover h2 {
+            font-size: 18px;
+            font-weight: 400;
+            color: #94a3b8;
+            margin-bottom: 56px;
+            line-height: 1.6;
+        }
+
+        .cover-meta {
+            display: flex;
+            gap: 48px;
+            justify-content: center;
+            flex-wrap: wrap;
+            padding-top: 48px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .cover-meta-item { text-align: center; }
+
+        .cover-meta-item .label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #64748b;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .cover-meta-item .value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #e2e8f0;
+        }
+
+        /* ═══════════════ LAYOUT ═══════════════ */
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 48px 32px;
+        }
+
+        .page-break { page-break-before: always; }
+
+        /* ═══════════════ SECTIONS ═══════════════ */
+        .section { margin-bottom: 56px; }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 2.5px;
+            margin-bottom: 6px;
+        }
+
+        .section-title {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+        }
+
+        .section-subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 28px;
+        }
+
+        .section-line {
+            width: 48px;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 2px;
+            margin-bottom: 28px;
+        }
+
+        /* ═══════════════ STAT GRID ═══════════════ */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 22px 18px;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stat-card .stat-value {
+            font-size: 30px;
+            font-weight: 800;
+            color: var(--primary);
+            line-height: 1.2;
+        }
+
+        .stat-card .stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .stat-card.s-accent .stat-value { color: var(--accent); }
+        .stat-card.s-green .stat-value { color: var(--green); }
+        .stat-card.s-orange .stat-value { color: var(--orange); }
+
+        /* ═══════════════ CARDS ═══════════════ */
+        .card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card-accent { border-left: 3px solid var(--accent); }
+
+        .card h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            color: var(--text-secondary);
+            font-size: 13.5px;
+            line-height: 1.7;
+        }
+
+        /* ═══════════════ TABLES ═══════════════ */
+        .tbl-wrap {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th {
+            background: var(--primary);
+            color: white;
+            padding: 13px 18px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        table td {
+            padding: 13px 18px;
+            border-bottom: 1px solid var(--border-light);
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        table tr:last-child td { border-bottom: none; }
+        table tr:nth-child(even) { background: #fafbfc; }
+
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        .fw-700 { font-weight: 700; color: var(--text); }
+
+        .row-total {
+            background: var(--primary) !important;
+        }
+        .row-total td {
+            color: white !important;
+            font-weight: 700 !important;
+            font-size: 14px !important;
+            border: none !important;
+        }
+
+        /* ═══════════════ FLOW ═══════════════ */
+        .flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            flex-wrap: wrap;
+            margin: 20px 0 28px;
+            padding: 24px 16px;
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+        }
+
+        .flow-step {
+            background: var(--primary);
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .flow-arr {
+            font-size: 18px;
+            color: var(--accent);
+            padding: 0 6px;
+            font-weight: 700;
+        }
+
+        /* ═══════════════ PHASE CARDS ═══════════════ */
+        .phase-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .phase-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 22px;
+            box-shadow: var(--shadow-sm);
+            transition: box-shadow 0.15s;
+        }
+
+        .phase-card:hover { box-shadow: var(--shadow-md); }
+
+        .pnum {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: var(--primary);
+            color: white;
+            border-radius: 7px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .phase-card h4 {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+        }
+
+        .phase-card p {
+            font-size: 12.5px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .phase-card ul {
+            margin-top: 6px;
+            padding-left: 16px;
+        }
+
+        .phase-card li {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 2px;
+            line-height: 1.5;
+        }
+
+        .ptag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 50px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-top: 10px;
+        }
+
+        .ptag-c { background: #dbeafe; color: #1e40af; }
+        .ptag-g { background: #d1fae5; color: #065f46; }
+        .ptag-h { background: #fef3c7; color: #92400e; }
+
+        .phase-wide { grid-column: span 2; border-left: 3px solid var(--accent); }
+
+        /* ═══════════════ GANTT ═══════════════ */
+        .gantt-wrap {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            box-shadow: var(--shadow-sm);
+            overflow-x: auto;
+        }
+
+        .gantt-months {
+            display: grid;
+            grid-template-columns: 200px repeat(6, 1fr);
+            margin-bottom: 6px;
+        }
+
+        .gantt-months .gm {
+            text-align: center;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--primary);
+            padding: 8px 0;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .gantt-months .gm:nth-child(odd):not(:first-child) { background: #f8fafc; }
+
+        .gantt-weeks {
+            display: grid;
+            grid-template-columns: 200px repeat(24, 1fr);
+            margin-bottom: 4px;
+        }
+
+        .gantt-weeks .gw {
+            font-size: 8px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .gantt-row {
+            display: grid;
+            grid-template-columns: 200px repeat(24, 1fr);
+            align-items: center;
+            min-height: 36px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .gantt-row .gr-name {
+            font-size: 11.5px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            padding-right: 10px;
+        }
+
+        .gr-bar {
+            height: 22px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            font-weight: 700;
+            color: white;
+            letter-spacing: 0.3px;
+        }
+
+        .b-blue { background: linear-gradient(90deg, #1e40af, #3b82f6); }
+        .b-green { background: linear-gradient(90deg, #047857, #34d399); }
+        .b-amber { background: linear-gradient(90deg, #92400e, #f59e0b); }
+        .b-purple { background: linear-gradient(90deg, #6b21a8, #a78bfa); }
+        .b-red { background: linear-gradient(90deg, #991b1b, #ef4444); }
+
+        /* ═══════════════ COST HERO ═══════════════ */
+        .cost-hero {
+            background: var(--primary);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            color: white;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cost-hero::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+            background: radial-gradient(ellipse at 80% 50%, rgba(8,145,178,0.12) 0%, transparent 60%);
+        }
+
+        .cost-hero-inner { position: relative; z-index: 1; }
+
+        .cost-hero .ch-label {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #67e8f9;
+            margin-bottom: 8px;
+        }
+
+        .cost-hero .ch-price {
+            font-size: 56px;
+            font-weight: 800;
+            letter-spacing: -2px;
+            line-height: 1.1;
+        }
+
+        .cost-hero .ch-sub {
+            font-size: 14px;
+            color: #94a3b8;
+            margin-top: 6px;
+        }
+
+        .cost-hero .ch-detail {
+            margin-top: 28px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .cost-hero .ch-item { text-align: center; }
+
+        .cost-hero .ch-item .ch-val {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .cost-hero .ch-item .ch-lbl {
+            font-size: 11px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+
+        /* ═══════════════ TEAM ═══════════════ */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+        }
+
+        .team-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .team-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+            margin: 0 auto 14px;
+            font-weight: 700;
+        }
+
+        .ta-1 { background: linear-gradient(135deg, #1e293b, #475569); }
+        .ta-2 { background: linear-gradient(135deg, #0e7490, #06b6d4); }
+        .ta-3 { background: linear-gradient(135deg, #7c3aed, #a78bfa); }
+
+        .team-card h4 { font-size: 14px; font-weight: 700; color: var(--primary); margin-bottom: 2px; }
+
+        .team-card .role {
+            font-size: 11px;
+            color: var(--accent);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        .team-card p { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+
+        /* ═══════════════ APPROACH CARDS ═══════════════ */
+        .approach-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .approach-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .approach-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin: 0 auto 12px;
+        }
+
+        .approach-card h4 { font-size: 13px; font-weight: 700; color: var(--primary); margin-bottom: 6px; }
+        .approach-card p { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+
+        /* ═══════════════ DELIVERABLES ═══════════════ */
+        .del-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .del-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 11px 14px;
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .del-check {
+            width: 18px; height: 18px; min-width: 18px;
+            background: var(--green-light);
+            color: var(--green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            margin-top: 1px;
+        }
+
+        .del-item span { font-size: 12.5px; color: var(--text-secondary); }
+
+        /* ═══════════════ PAYMENT ═══════════════ */
+        .pay-steps {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin: 24px 0;
+        }
+
+        .pay-step {
+            text-align: center;
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px 14px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .pay-dot {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            margin: 0 auto 10px;
+        }
+
+        .pay-step .pay-label { font-size: 11px; font-weight: 600; color: var(--primary); margin-bottom: 4px; }
+        .pay-step .pay-amount { font-size: 20px; font-weight: 800; color: var(--accent-dark); }
+        .pay-step .pay-trigger { font-size: 10px; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
+
+        /* ═══════════════ NOTES ═══════════════ */
+        .note {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: var(--radius);
+            padding: 14px 18px;
+            font-size: 12.5px;
+            color: #92400e;
+            line-height: 1.6;
+            margin: 14px 0;
+        }
+
+        .note strong { color: #78350f; }
+
+        .info {
+            background: var(--accent-light);
+            border: 1px solid #a5f3fc;
+            border-radius: var(--radius);
+            padding: 14px 18px;
+            font-size: 12.5px;
+            color: #164e63;
+            line-height: 1.6;
+            margin: 14px 0;
+        }
+
+        /* ═══════════════ TERMS ═══════════════ */
+        .terms-list { list-style: none; padding: 0; }
+
+        .terms-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-light);
+            font-size: 13px;
+            color: var(--text-secondary);
+            display: flex;
+            gap: 10px;
+            line-height: 1.6;
+        }
+
+        .t-num {
+            min-width: 22px; height: 22px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--primary);
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        /* ═══════════════ SIGNATURE ═══════════════ */
+        .sig-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            margin-top: 30px;
+        }
+
+        .sig-block .sig-label {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 30px;
+            font-size: 13px;
+        }
+
+        .sig-line {
+            border-bottom: 1px solid #cbd5e1;
+            margin-bottom: 6px;
+            height: 30px;
+        }
+
+        .sig-hint { font-size: 11px; color: var(--text-muted); }
+
+        /* ═══════════════ FOOTER ═══════════════ */
+        .footer {
+            text-align: center;
+            padding: 36px;
+            background: var(--primary);
+            color: #94a3b8;
+            font-size: 12px;
+            margin-top: 56px;
+        }
+
+        /* ═══════════════ PRINT ═══════════════ */
+        @media print {
+            body { font-size: 11px; background: white; }
+            .cover { min-height: auto; padding: 60px 40px; }
+            .container { padding: 20px 24px; }
+            .card, .phase-card { break-inside: avoid; }
+            .no-print { display: none; }
+        }
+
+        @media (max-width: 768px) {
+            .stat-grid, .phase-grid, .approach-grid, .team-grid { grid-template-columns: 1fr; }
+            .phase-wide { grid-column: span 1; }
+            .cost-hero .ch-detail { grid-template-columns: 1fr; }
+            .del-grid { grid-template-columns: 1fr; }
+            .pay-steps { grid-template-columns: 1fr 1fr; }
+            .cover h1 { font-size: 32px; }
+            .sig-grid { grid-template-columns: 1fr; gap: 30px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════ COVER ════════════════════════════════════════ -->
+<div class="cover">
+    <div class="cover-content">
+        <div class="cover-badge">Technical &amp; Commercial Proposal</div>
+        <h1>Printing Press<br><span>Management System</span></h1>
+        <h2>Complete Estimation &rarr; Production &rarr; Delivery &rarr; Accounting<br>workflow on Odoo Enterprise v19</h2>
+        <div class="cover-meta">
+            <div class="cover-meta-item">
+                <div class="label">Platform</div>
+                <div class="value">Odoo Enterprise v19</div>
+            </div>
+            <div class="cover-meta-item">
+                <div class="label">Duration</div>
+                <div class="value">24 Weeks</div>
+            </div>
+            <div class="cover-meta-item">
+                <div class="label">Modules</div>
+                <div class="value">14+ Modules</div>
+            </div>
+            <div class="cover-meta-item">
+                <div class="label">Date</div>
+                <div class="value">April 2026</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+
+<!-- ════════════ 01 — EXECUTIVE SUMMARY ════════════ -->
+<div class="section">
+    <div class="section-label">01</div>
+    <div class="section-title">Executive Summary</div>
+    <div class="section-line"></div>
+
+    <div class="stat-grid">
+        <div class="stat-card">
+            <div class="stat-value">18</div>
+            <div class="stat-label">Phases</div>
+        </div>
+        <div class="stat-card s-accent">
+            <div class="stat-value">24</div>
+            <div class="stat-label">Weeks</div>
+        </div>
+        <div class="stat-card s-green">
+            <div class="stat-value">14+</div>
+            <div class="stat-label">Modules</div>
+        </div>
+        <div class="stat-card s-orange">
+            <div class="stat-value">2</div>
+            <div class="stat-label">Resources</div>
+        </div>
+    </div>
+
+    <div class="card card-accent">
+        <p>This proposal outlines the complete implementation of a <strong>Printing Press Management System</strong> on <strong>Odoo Enterprise v19</strong>, covering the entire business workflow from <strong>job evaluation and cost estimation</strong> through <strong>production execution, delivery, and full financial accounting</strong>.</p>
+        <br>
+        <p>Our approach leverages <strong>AI-Assisted Development</strong> methodology with a <strong>pre-validated estimation engine prototype</strong>, enabling us to deliver enterprise-grade quality with a lean, dedicated team in <strong>6 months</strong>.</p>
+    </div>
+
+    <h3 style="font-size: 14px; font-weight: 700; color: var(--primary); margin: 22px 0 8px;">End-to-End Business Process</h3>
+    <div class="flow">
+        <div class="flow-step">CRM<br><small>Lead</small></div>
+        <div class="flow-arr">&rarr;</div>
+        <div class="flow-step" style="background:var(--accent-dark);">Estimation<br><small>Cost Engine</small></div>
+        <div class="flow-arr">&rarr;</div>
+        <div class="flow-step">Quotation<br><small>Multi-Product</small></div>
+        <div class="flow-arr">&rarr;</div>
+        <div class="flow-step" style="background:var(--green);">Material<br><small>Procurement</small></div>
+        <div class="flow-arr">&rarr;</div>
+        <div class="flow-step" style="background:var(--orange);">Production<br><small>MRP</small></div>
+        <div class="flow-arr">&rarr;</div>
+        <div class="flow-step" style="background:#7c3aed;">Delivery<br><small>Dispatch</small></div>
+        <div class="flow-arr">&rarr;</div>
+        <div class="flow-step" style="background:var(--red);">Accounting<br><small>Job Costing</small></div>
+    </div>
+</div>
+
+<!-- ════════════ 02 — SCOPE OF WORK ════════════ -->
+<div class="section page-break">
+    <div class="section-label">02</div>
+    <div class="section-title">Scope of Work</div>
+    <div class="section-subtitle">18 implementation phases covering all business requirements</div>
+    <div class="section-line"></div>
+
+    <div class="phase-grid">
+        <!-- Phase 1 -->
+        <div class="phase-card phase-wide">
+            <div class="pnum">1</div>
+            <h4>Job Evaluation / Print Cost Estimation Engine</h4>
+            <p><strong>Core Custom Module — Heart of the System</strong></p>
+            <ul>
+                <li><strong>Raw Material Costing:</strong> Paper type, GSM, size, sheet utilization, waste calculation, cut planning &amp; optimization</li>
+                <li><strong>Printing Specifications:</strong> 1 Color, 2 Color, Multi-Color, Recto &amp; Recto-Verso</li>
+                <li><strong>Post-Printing Operations:</strong> Die Cutting, Waterbase, Lamination, Spot UV, Hot Foiling, Embossing, Window Patching, Pasting — each with machine, setup, run, consumables &amp; labor costing</li>
+                <li><strong>Machine Selection Engine:</strong> Auto-select based on sheet size, print type, color, finishing &amp; quantity</li>
+                <li><strong>Impression-Based Costing:</strong> Offset (plate, ink, setup/running/wastage sheets) &amp; Digital (click cost, toner)</li>
+                <li><strong>Waste Calculation Engine:</strong> Paper, setup, production &amp; cutting wastage reflected in costing</li>
+                <li><strong>Cost Components:</strong> Material, Machine, Labour, Consumables, Operational, Maintenance, Legal &amp; Delivery allocations</li>
+                <li><strong>Profit Margin Engine:</strong> Configurable per job, product, customer &amp; category</li>
+            </ul>
+            <span class="ptag ptag-c">Custom Development</span>
+        </div>
+
+        <div class="phase-card">
+            <div class="pnum">2</div>
+            <h4>Multi-Product Quotation</h4>
+            <p>Auto-generate quotations from evaluations. Multiple products per quote, each linked to its own evaluation sheet.</p>
+            <span class="ptag ptag-h">Config + Custom</span>
+        </div>
+
+        <div class="phase-card">
+            <div class="pnum">3</div>
+            <h4>Material Request Workflow</h4>
+            <p>Automated requisition, stock validation, reservation &amp; transfer. Auto PO generation on shortage (local &amp; international).</p>
+            <span class="ptag ptag-g">Configuration</span>
+        </div>
+
+        <div class="phase-card">
+            <div class="pnum">4</div>
+            <h4>Job Order Creation (MRP)</h4>
+            <p>Machine &amp; operator allocation, material consumption, routing steps. Printable job cards. Change request with revision tracking.</p>
+            <span class="ptag ptag-h">Config + Custom</span>
+        </div>
+
+        <div class="phase-card">
+            <div class="pnum">5</div>
+            <h4>Production Execution</h4>
+            <p>Routing: Printing &rarr; Drying &rarr; Lamination &rarr; Die Cutting &rarr; Pasting &rarr; Packing. Time tracking per workcenter.</p>
+            <span class="ptag ptag-g">Configuration</span>
+        </div>
+
+        <div class="phase-card">
+            <div class="pnum">6</div>
+            <h4>Delivery Management</h4>
+            <p>Delivery notes, vehicle assignment, route scheduling, customer confirmation.</p>
+            <span class="ptag ptag-g">Configuration</span>
+        </div>
+
+        <div class="phase-card">
+            <div class="pnum">7</div>
+            <h4>Customer Invoicing</h4>
+            <p>Auto invoice on delivery or order confirmation. Payment tracking &amp; follow-up.</p>
+            <span class="ptag ptag-g">Configuration</span>
+        </div>
+
+        <div class="phase-card">
+            <div class="pnum">8</div>
+            <h4>Complete Job Costing</h4>
+            <p>Full cost capture in accounting. Real-time estimated vs actual cost comparison. Analytic accounting per job.</p>
+            <span class="ptag ptag-c">Custom Development</span>
+        </div>
+
+        <div class="phase-card">
+            <div class="pnum">9</div>
+            <h4>Scrap / Rejection Management</h4>
+            <p>Reprint or refund workflows. Reason tracking (color mismatch, operator error, machine, material). Auto accounting posting.</p>
+            <span class="ptag ptag-h">Config + Custom</span>
+        </div>
+
+        <div class="phase-card">
+            <div class="pnum">10</div>
+            <h4>Maintenance Integration</h4>
+            <p>Machine breakdown &amp; preventive maintenance. Spare parts. Cost allocated to jobs.</p>
+            <span class="ptag ptag-g">Configuration</span>
+        </div>
+
+        <div class="phase-card">
+            <div class="pnum">11</div>
+            <h4>Repair Module</h4>
+            <p>Vendor &amp; internal workshop repairs. Cost linked to machine lifecycle.</p>
+            <span class="ptag ptag-g">Configuration</span>
+        </div>
+
+        <div class="phase-card">
+            <div class="pnum">12</div>
+            <h4>CRM Integration</h4>
+            <p>Lead &amp; opportunity tracking. Convert: Opportunity &rarr; Evaluation &rarr; Quotation.</p>
+            <span class="ptag ptag-h">Config + Custom</span>
+        </div>
+
+        <div class="phase-card">
+            <div class="pnum">13</div>
+            <h4>Website / Customer Portal</h4>
+            <p>Upload artwork, request quotes, track orders, approve quotations online.</p>
+            <span class="ptag ptag-c">Custom Development</span>
+        </div>
+
+        <div class="phase-card">
+            <div class="pnum">14</div>
+            <h4>WhatsApp Integration</h4>
+            <p>Quotation alerts, approval reminders, delivery &amp; invoice notifications.</p>
+            <span class="ptag ptag-g">Configuration</span>
+        </div>
+
+        <div class="phase-card">
+            <div class="pnum">15</div>
+            <h4>Email Marketing</h4>
+            <p>Corporate printing offers, packaging promotions, seasonal campaigns.</p>
+            <span class="ptag ptag-g">Configuration</span>
+        </div>
+
+        <div class="phase-card">
+            <div class="pnum">16</div>
+            <h4>HR &amp; Payroll</h4>
+            <p>Attendance, shifts, overtime. Payroll integrated with production labour. Kuwait Labour Law compliance.</p>
+            <span class="ptag ptag-h">Config + Custom</span>
+        </div>
+
+        <div class="phase-card">
+            <div class="pnum">17</div>
+            <h4>Project Management</h4>
+            <p>Complex print jobs as projects. Tasks, milestones, timeline monitoring.</p>
+            <span class="ptag ptag-g">Configuration</span>
+        </div>
+
+        <div class="phase-card phase-wide" style="border-left-color: var(--orange);">
+            <div class="pnum" style="background:var(--orange);">18</div>
+            <h4>Reporting &amp; Management Dashboards</h4>
+            <ul style="columns: 2; margin-top: 8px;">
+                <li>Job profitability analysis</li>
+                <li>Machine utilization reports</li>
+                <li>Material consumption tracking</li>
+                <li>Waste percentage monitoring</li>
+                <li>Operator productivity</li>
+                <li>Quotation conversion ratio</li>
+                <li>Delivery performance KPIs</li>
+                <li>Customer profitability</li>
+            </ul>
+            <span class="ptag ptag-c">Custom Development</span>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════ 03 — APPROACH ════════════ -->
+<div class="section page-break">
+    <div class="section-label">03</div>
+    <div class="section-title">Implementation Approach</div>
+    <div class="section-subtitle">AI-Augmented Development for accelerated delivery</div>
+    <div class="section-line"></div>
+
+    <div class="approach-grid">
+        <div class="approach-card">
+            <div class="approach-icon" style="background:#dbeafe; color:#2563eb;">&#9889;</div>
+            <h4>AI-Augmented Dev</h4>
+            <p>Advanced AI coding tools generate production-quality Odoo Python &amp; XML code 3–5x faster than traditional methods.</p>
+        </div>
+        <div class="approach-card">
+            <div class="approach-icon" style="background:#d1fae5; color:#059669;">&#10003;</div>
+            <h4>Pre-Validated Logic</h4>
+            <p>Estimation engine formulas fully prototyped and tested with real printing press data. Proven calculations from day one.</p>
+        </div>
+        <div class="approach-card">
+            <div class="approach-icon" style="background:#ede9fe; color:#7c3aed;">&#9881;</div>
+            <h4>Agile Delivery</h4>
+            <p>Two-week sprints with demos. You see progress every 2 weeks and provide feedback before we proceed.</p>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════ 04 — TIMELINE ════════════ -->
+<div class="section">
+    <div class="section-label">04</div>
+    <div class="section-title">Project Timeline</div>
+    <div class="section-subtitle">24-week implementation across 6 milestones</div>
+    <div class="section-line"></div>
+
+    <div class="gantt-wrap">
+        <div class="gantt-months">
+            <div></div>
+            <div class="gm">Month 1</div>
+            <div class="gm">Month 2</div>
+            <div class="gm">Month 3</div>
+            <div class="gm">Month 4</div>
+            <div class="gm">Month 5</div>
+            <div class="gm">Month 6</div>
+        </div>
+        <div class="gantt-weeks">
+            <div></div>
+            <div class="gw">1</div><div class="gw">2</div><div class="gw">3</div><div class="gw">4</div>
+            <div class="gw">5</div><div class="gw">6</div><div class="gw">7</div><div class="gw">8</div>
+            <div class="gw">9</div><div class="gw">10</div><div class="gw">11</div><div class="gw">12</div>
+            <div class="gw">13</div><div class="gw">14</div><div class="gw">15</div><div class="gw">16</div>
+            <div class="gw">17</div><div class="gw">18</div><div class="gw">19</div><div class="gw">20</div>
+            <div class="gw">21</div><div class="gw">22</div><div class="gw">23</div><div class="gw">24</div>
+        </div>
+
+        <div class="gantt-row">
+            <div class="gr-name"><strong>P1</strong> Estimation Engine</div>
+            <div style="grid-column: 2/10;"><div class="gr-bar b-blue">CUSTOM — 8 WKS</div></div>
+        </div>
+        <div class="gantt-row">
+            <div class="gr-name"><strong>P2</strong> Quotation</div>
+            <div style="grid-column: 8/11;"><div class="gr-bar b-green">3W</div></div>
+        </div>
+        <div class="gantt-row">
+            <div class="gr-name"><strong>P3</strong> Material Request</div>
+            <div style="grid-column: 10/13;"><div class="gr-bar b-green">3W</div></div>
+        </div>
+        <div class="gantt-row">
+            <div class="gr-name"><strong>P4-5</strong> Job Order &amp; Production</div>
+            <div style="grid-column: 12/16;"><div class="gr-bar b-blue">4 WEEKS</div></div>
+        </div>
+        <div class="gantt-row">
+            <div class="gr-name"><strong>P6-7</strong> Delivery &amp; Invoicing</div>
+            <div style="grid-column: 15/18;"><div class="gr-bar b-green">3W</div></div>
+        </div>
+        <div class="gantt-row">
+            <div class="gr-name"><strong>P8</strong> Job Costing</div>
+            <div style="grid-column: 16/19;"><div class="gr-bar b-blue">3W</div></div>
+        </div>
+        <div class="gantt-row">
+            <div class="gr-name"><strong>P9</strong> Scrap &amp; Rejection</div>
+            <div style="grid-column: 18/20;"><div class="gr-bar b-amber">2W</div></div>
+        </div>
+        <div class="gantt-row">
+            <div class="gr-name"><strong>P10-11</strong> Maintenance &amp; Repairs</div>
+            <div style="grid-column: 18/20;"><div class="gr-bar b-green">2W</div></div>
+        </div>
+        <div class="gantt-row">
+            <div class="gr-name"><strong>P12-14</strong> CRM, Website, WhatsApp</div>
+            <div style="grid-column: 18/22;"><div class="gr-bar b-blue">4 WEEKS</div></div>
+        </div>
+        <div class="gantt-row">
+            <div class="gr-name"><strong>P15-17</strong> Email, HR, Projects</div>
+            <div style="grid-column: 20/23;"><div class="gr-bar b-green">3W</div></div>
+        </div>
+        <div class="gantt-row">
+            <div class="gr-name"><strong>P18</strong> Dashboards</div>
+            <div style="grid-column: 22/24;"><div class="gr-bar b-blue">2W</div></div>
+        </div>
+        <div class="gantt-row">
+            <div class="gr-name"><strong>UAT</strong> Testing &amp; Training</div>
+            <div style="grid-column: 22/25;"><div class="gr-bar b-purple">3 WEEKS</div></div>
+        </div>
+        <div class="gantt-row">
+            <div class="gr-name"><strong>GO-LIVE</strong></div>
+            <div style="grid-column: 25/26;"><div class="gr-bar b-red" style="width:24px; border-radius:50%;">&#9733;</div></div>
+        </div>
+    </div>
+
+    <div class="tbl-wrap" style="margin-top: 24px;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Milestone</th>
+                    <th>Weeks</th>
+                    <th>Phases</th>
+                    <th>Deliverable</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td class="fw-700">M1 — Core Engine</td><td>1–8</td><td>Phase 1</td><td>Working estimation module with all costing engines</td></tr>
+                <tr><td class="fw-700">M2 — Quote to Procure</td><td>8–11</td><td>Phase 2–3</td><td>Multi-product quotation &amp; material procurement</td></tr>
+                <tr><td class="fw-700">M3 — Production Cycle</td><td>11–17</td><td>Phase 4–7</td><td>Complete production &rarr; delivery &rarr; invoice cycle</td></tr>
+                <tr><td class="fw-700">M4 — Financial</td><td>15–19</td><td>Phase 8–11</td><td>Job costing, scrap handling, maintenance</td></tr>
+                <tr><td class="fw-700">M5 — Ecosystem</td><td>17–22</td><td>Phase 12–18</td><td>CRM, portal, WhatsApp, HR, dashboards</td></tr>
+                <tr><td class="fw-700">M6 — Go-Live</td><td>22–24</td><td>UAT</td><td>Testing complete, users trained, production launch</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ════════════ 05 — TEAM ════════════ -->
+<div class="section">
+    <div class="section-label">05</div>
+    <div class="section-title">Project Team</div>
+    <div class="section-line"></div>
+
+    <div class="team-grid">
+        <div class="team-card">
+            <div class="team-avatar ta-1">PM</div>
+            <h4>Project Manager</h4>
+            <div class="role">Planning &amp; Coordination</div>
+            <p>Scope, timeline, client communication, sprint planning, milestone tracking, risk management.</p>
+        </div>
+        <div class="team-card">
+            <div class="team-avatar ta-2">SD</div>
+            <h4>Odoo Developer</h4>
+            <div class="role">Technical Implementation</div>
+            <p>Custom modules, standard configuration, business logic, integrations, testing.</p>
+        </div>
+        <div class="team-card">
+            <div class="team-avatar ta-3">AI</div>
+            <h4>AI Dev Assistant</h4>
+            <div class="role">Code Acceleration</div>
+            <p>AI-powered code generation for Odoo models, views, reports &amp; business logic at 3–5x speed.</p>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════ 06 — INVESTMENT ════════════ -->
+<div class="section page-break">
+    <div class="section-label">06</div>
+    <div class="section-title">Project Cost</div>
+    <div class="section-subtitle">Transparent resource-based costing</div>
+    <div class="section-line"></div>
+
+    <!-- Hero -->
+    <div class="cost-hero">
+        <div class="cost-hero-inner">
+            <div class="ch-label">Total Project Cost</div>
+            <div class="ch-price">7,600 KWD</div>
+            <div class="ch-sub">Implementation &bull; 24 weeks &bull; All 18 phases &bull; 2 dedicated resources</div>
+            <div class="ch-detail">
+                <div class="ch-item">
+                    <div class="ch-val">7,200</div>
+                    <div class="ch-lbl">Team Cost (KWD)</div>
+                </div>
+                <div class="ch-item">
+                    <div class="ch-val">400</div>
+                    <div class="ch-lbl">AI Tools (KWD)</div>
+                </div>
+                <div class="ch-item">
+                    <div class="ch-val">6</div>
+                    <div class="ch-lbl">Months</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resource Cost Breakdown -->
+    <h3 style="font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 12px;">A. Resource Cost Breakdown</h3>
+
+    <div class="tbl-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Resource</th>
+                    <th class="text-center">Monthly Cost</th>
+                    <th class="text-center">Duration</th>
+                    <th class="text-right">Total (KWD)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="fw-700">Odoo Developer</td>
+                    <td class="text-center">600 KWD</td>
+                    <td class="text-center">6 months</td>
+                    <td class="text-right fw-700">3,600</td>
+                </tr>
+                <tr>
+                    <td class="fw-700">Project Manager</td>
+                    <td class="text-center">600 KWD</td>
+                    <td class="text-center">6 months</td>
+                    <td class="text-right fw-700">3,600</td>
+                </tr>
+                <tr>
+                    <td class="fw-700">AI Development Tools</td>
+                    <td class="text-center">~65 KWD</td>
+                    <td class="text-center">6 months</td>
+                    <td class="text-right fw-700">400</td>
+                </tr>
+                <tr class="row-total">
+                    <td colspan="3"><strong>TOTAL PROJECT COST</strong></td>
+                    <td class="text-right"><strong>7,600 KWD</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Phase Allocation -->
+    <h3 style="font-size: 15px; font-weight: 700; color: var(--primary); margin: 28px 0 12px;">B. Cost Allocation by Phase</h3>
+
+    <div class="tbl-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Phase</th>
+                    <th>Description</th>
+                    <th>Type</th>
+                    <th class="text-center">Weeks</th>
+                    <th class="text-right">Cost (KWD)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="fw-700">Phase 1</td>
+                    <td>Estimation Engine (Material + Machine + Waste + Profit)</td>
+                    <td><span class="ptag ptag-c" style="margin:0">Custom</span></td>
+                    <td class="text-center">8</td>
+                    <td class="text-right fw-700">2,500</td>
+                </tr>
+                <tr>
+                    <td class="fw-700">Phase 2–3</td>
+                    <td>Multi-Product Quotation + Material Request Workflow</td>
+                    <td><span class="ptag ptag-h" style="margin:0">Hybrid</span></td>
+                    <td class="text-center">3</td>
+                    <td class="text-right fw-700">950</td>
+                </tr>
+                <tr>
+                    <td class="fw-700">Phase 4–7</td>
+                    <td>Job Orders, Production, Delivery &amp; Invoicing</td>
+                    <td><span class="ptag ptag-g" style="margin:0">Config</span></td>
+                    <td class="text-center">5</td>
+                    <td class="text-right fw-700">1,550</td>
+                </tr>
+                <tr>
+                    <td class="fw-700">Phase 8–9</td>
+                    <td>Job Costing in Accounting + Scrap Management</td>
+                    <td><span class="ptag ptag-c" style="margin:0">Custom</span></td>
+                    <td class="text-center">3</td>
+                    <td class="text-right fw-700">950</td>
+                </tr>
+                <tr>
+                    <td class="fw-700">Phase 10–14</td>
+                    <td>Maintenance, Repairs, CRM, Website Portal, WhatsApp</td>
+                    <td><span class="ptag ptag-h" style="margin:0">Hybrid</span></td>
+                    <td class="text-center">4</td>
+                    <td class="text-right fw-700">700</td>
+                </tr>
+                <tr>
+                    <td class="fw-700">Phase 15–18</td>
+                    <td>Email Marketing, HR/Payroll, Projects, Dashboards</td>
+                    <td><span class="ptag ptag-g" style="margin:0">Config</span></td>
+                    <td class="text-center">3</td>
+                    <td class="text-right fw-700">550</td>
+                </tr>
+                <tr style="background:#f0f9ff !important;">
+                    <td class="fw-700">UAT</td>
+                    <td>User Acceptance Testing, Training &amp; Go-Live Support</td>
+                    <td><span class="ptag ptag-h" style="margin:0">Support</span></td>
+                    <td class="text-center">3</td>
+                    <td class="text-right fw-700">400</td>
+                </tr>
+                <tr class="row-total">
+                    <td colspan="3">TOTAL</td>
+                    <td class="text-center">24 wks</td>
+                    <td class="text-right">7,600 KWD</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Odoo License -->
+    <h3 style="font-size: 15px; font-weight: 700; color: var(--primary); margin: 28px 0 12px;">C. Odoo Enterprise License &amp; Hosting (Annual — Paid Separately)</h3>
+
+    <div class="tbl-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Details</th>
+                    <th>Paid To</th>
+                    <th class="text-right">Annual (KWD)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="fw-700">Odoo Enterprise License</td>
+                    <td>Per-user subscription, all modules (~15–20 users)</td>
+                    <td>Odoo S.A.</td>
+                    <td class="text-right fw-700">2,400 – 4,800</td>
+                </tr>
+                <tr>
+                    <td class="fw-700">Hosting (Odoo.sh / Cloud)</td>
+                    <td>Production + staging servers, backups, SSL</td>
+                    <td>Odoo.sh / Provider</td>
+                    <td class="text-right fw-700">360 – 720</td>
+                </tr>
+                <tr class="row-total">
+                    <td colspan="2">TOTAL ANNUAL RECURRING</td>
+                    <td></td>
+                    <td class="text-right">2,760 – 5,520 KWD/yr</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="note">
+        <strong>Note:</strong> Odoo Enterprise license and hosting fees are paid directly by the client to Odoo S.A. or the hosting provider. These are not included in the implementation cost. Actual pricing depends on final user count and selected plan.
+    </div>
+
+    <!-- First Year Summary -->
+    <div style="background: #f0fdf4; border: 2px solid #bbf7d0; border-radius: var(--radius-lg); padding: 24px; margin-top: 24px;">
+        <h3 style="color: #166534; font-size: 15px; margin-bottom: 14px;">Total First Year Summary</h3>
+        <table style="margin:0">
+            <tbody>
+                <tr>
+                    <td class="fw-700">Implementation (one-time)</td>
+                    <td class="text-right fw-700">7,600 KWD</td>
+                </tr>
+                <tr>
+                    <td>Odoo License + Hosting (annual, paid to Odoo)</td>
+                    <td class="text-right">2,760 – 5,520 KWD</td>
+                </tr>
+                <tr class="row-total">
+                    <td><strong>TOTAL YEAR 1</strong></td>
+                    <td class="text-right"><strong>10,360 – 13,120 KWD</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ════════════ 07 — PAYMENT SCHEDULE ════════════ -->
+<div class="section">
+    <div class="section-label">07</div>
+    <div class="section-title">Payment Schedule</div>
+    <div class="section-subtitle">Milestone-based payments tied to deliverables</div>
+    <div class="section-line"></div>
+
+    <div class="pay-steps">
+        <div class="pay-step">
+            <div class="pay-dot">1</div>
+            <div class="pay-label">Kickoff</div>
+            <div class="pay-amount">1,900</div>
+            <div class="pay-trigger">25% — Contract signing</div>
+        </div>
+        <div class="pay-step">
+            <div class="pay-dot">2</div>
+            <div class="pay-label">Engine Demo</div>
+            <div class="pay-amount">1,900</div>
+            <div class="pay-trigger">25% — Phase 1 complete</div>
+        </div>
+        <div class="pay-step">
+            <div class="pay-dot">3</div>
+            <div class="pay-label">Production Cycle</div>
+            <div class="pay-amount">1,900</div>
+            <div class="pay-trigger">25% — Phase 2–9 complete</div>
+        </div>
+        <div class="pay-step">
+            <div class="pay-dot">4</div>
+            <div class="pay-label">Go-Live</div>
+            <div class="pay-amount">1,900</div>
+            <div class="pay-trigger">25% — UAT &amp; launch</div>
+        </div>
+    </div>
+
+    <div class="tbl-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Payment</th>
+                    <th>Trigger</th>
+                    <th class="text-center">%</th>
+                    <th class="text-right">Amount (KWD)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="fw-700">Payment 1</td>
+                    <td>Contract signing &amp; project kickoff</td>
+                    <td class="text-center">25%</td>
+                    <td class="text-right fw-700">1,900</td>
+                </tr>
+                <tr>
+                    <td class="fw-700">Payment 2</td>
+                    <td>Estimation Engine delivered &amp; approved (Phase 1)</td>
+                    <td class="text-center">25%</td>
+                    <td class="text-right fw-700">1,900</td>
+                </tr>
+                <tr>
+                    <td class="fw-700">Payment 3</td>
+                    <td>Full production cycle working (Phase 2–9)</td>
+                    <td class="text-center">25%</td>
+                    <td class="text-right fw-700">1,900</td>
+                </tr>
+                <tr>
+                    <td class="fw-700">Payment 4</td>
+                    <td>All modules deployed, UAT passed, go-live</td>
+                    <td class="text-center">25%</td>
+                    <td class="text-right fw-700">1,900</td>
+                </tr>
+                <tr class="row-total">
+                    <td colspan="2">TOTAL</td>
+                    <td class="text-center">100%</td>
+                    <td class="text-right">7,600 KWD</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ════════════ 08 — DELIVERABLES ════════════ -->
+<div class="section page-break">
+    <div class="section-label">08</div>
+    <div class="section-title">Deliverables</div>
+    <div class="section-line"></div>
+
+    <div class="del-grid">
+        <div class="del-item"><div class="del-check">&#10003;</div><span>Fully configured Odoo Enterprise v19 instance</span></div>
+        <div class="del-item"><div class="del-check">&#10003;</div><span>Custom Print Cost Estimation Module</span></div>
+        <div class="del-item"><div class="del-check">&#10003;</div><span>Machine Selection &amp; Costing Engine</span></div>
+        <div class="del-item"><div class="del-check">&#10003;</div><span>Automatic Waste Calculation Engine</span></div>
+        <div class="del-item"><div class="del-check">&#10003;</div><span>Multi-Product Quotation Workflow</span></div>
+        <div class="del-item"><div class="del-check">&#10003;</div><span>Material Request &amp; Procurement Automation</span></div>
+        <div class="del-item"><div class="del-check">&#10003;</div><span>MRP Job Orders with Printed Job Cards</span></div>
+        <div class="del-item"><div class="del-check">&#10003;</div><span>Production Routing &amp; Time Tracking</span></div>
+        <div class="del-item"><div class="del-check">&#10003;</div><span>Delivery Management &amp; Dispatch Planning</span></div>
+        <div class="del-item"><div class="del-check">&#10003;</div><span>Customer Invoicing &amp; Payment Tracking</span></div>
+        <div class="del-item"><div class="del-check">&#10003;</div><span>Job Costing in Accounting (Est. vs Actual)</span></div>
+        <div class="del-item"><div class="del-check">&#10003;</div><span>Scrap/Rejection Management</span></div>
+        <div class="del-item"><div class="del-check">&#10003;</div><span>Change Request &amp; Revision Tracking</span></div>
+        <div class="del-item"><div class="del-check">&#10003;</div><span>Maintenance &amp; Repair Module</span></div>
+        <div class="del-item"><div class="del-check">&#10003;</div><span>CRM Pipeline (Lead &rarr; Evaluation &rarr; Quote)</span></div>
+        <div class="del-item"><div class="del-check">&#10003;</div><span>Customer Website Portal</span></div>
+        <div class="del-item"><div class="del-check">&#10003;</div><span>WhatsApp Notifications</span></div>
+        <div class="del-item"><div class="del-check">&#10003;</div><span>Email Marketing Campaigns</span></div>
+        <div class="del-item"><div class="del-check">&#10003;</div><span>HR &amp; Payroll (Kuwait compliance)</span></div>
+        <div class="del-item"><div class="del-check">&#10003;</div><span>Project Management Module</span></div>
+        <div class="del-item"><div class="del-check">&#10003;</div><span>8 Management Dashboards &amp; Reports</span></div>
+        <div class="del-item"><div class="del-check">&#10003;</div><span>Data Migration &amp; Master Data Setup</span></div>
+        <div class="del-item"><div class="del-check">&#10003;</div><span>User Training (all departments)</span></div>
+        <div class="del-item"><div class="del-check">&#10003;</div><span>30-Day Post Go-Live Support</span></div>
+    </div>
+</div>
+
+<!-- ════════════ 09 — TERMS ════════════ -->
+<div class="section">
+    <div class="section-label">09</div>
+    <div class="section-title">Terms &amp; Conditions</div>
+    <div class="section-line"></div>
+
+    <ul class="terms-list">
+        <li><span class="t-num">1</span><span><strong>Validity:</strong> This proposal is valid for 30 days from date of issue (April 5, 2026).</span></li>
+        <li><span class="t-num">2</span><span><strong>Scope:</strong> All 18 phases as detailed. Additional requirements beyond this scope will be quoted separately.</span></li>
+        <li><span class="t-num">3</span><span><strong>Odoo License:</strong> Enterprise license fees are paid directly by the client to Odoo S.A. and are excluded from implementation cost.</span></li>
+        <li><span class="t-num">4</span><span><strong>Client Responsibilities:</strong> Timely access to subject matter experts, approval of deliverables within 5 business days, and data for migration.</span></li>
+        <li><span class="t-num">5</span><span><strong>Timeline:</strong> 24-week timeline assumes client feedback within agreed SLA. Delays in client responses extend timeline accordingly.</span></li>
+        <li><span class="t-num">6</span><span><strong>IP Ownership:</strong> All custom modules become client property upon full payment.</span></li>
+        <li><span class="t-num">7</span><span><strong>Warranty:</strong> 30-day post go-live warranty included. Bugs found during this period fixed at no extra cost.</span></li>
+        <li><span class="t-num">8</span><span><strong>Confidentiality:</strong> Both parties agree to keep all project information and business data confidential.</span></li>
+        <li><span class="t-num">9</span><span><strong>Currency:</strong> All prices in Kuwaiti Dinar (KWD), exclusive of applicable taxes.</span></li>
+    </ul>
+</div>
+
+<!-- ════════════ 10 — ACCEPTANCE ════════════ -->
+<div class="section" style="margin-top: 48px;">
+    <div class="section-label">10</div>
+    <div class="section-title">Acceptance</div>
+    <div class="section-line"></div>
+
+    <div class="card" style="padding: 36px;">
+        <p style="margin-bottom: 24px; color: var(--text-secondary); font-size: 13px;">By signing below, both parties agree to the scope, timeline, costs, and terms outlined in this proposal.</p>
+
+        <div class="sig-grid">
+            <div class="sig-block">
+                <div class="sig-label">For the Client</div>
+                <div class="sig-line"></div>
+                <div class="sig-hint">Authorized Signatory</div>
+                <br>
+                <div class="sig-line"></div>
+                <div class="sig-hint">Signature &amp; Date</div>
+            </div>
+            <div class="sig-block">
+                <div class="sig-label">For the Service Provider</div>
+                <div class="sig-line"></div>
+                <div class="sig-hint">Authorized Signatory</div>
+                <br>
+                <div class="sig-line"></div>
+                <div class="sig-hint">Signature &amp; Date</div>
+            </div>
+        </div>
+
+        <div style="margin-top: 36px; padding-top: 16px; border-top: 1px solid var(--border); text-align: center;">
+            <p style="font-size: 11px; color: var(--text-muted);">
+                Ref: PP-2026-001 &bull; April 5, 2026 &bull; Valid until May 5, 2026
+            </p>
+        </div>
+    </div>
+</div>
+
+</div><!-- end container -->
+
+<div class="footer">
+    <p>Printing Press Management System &bull; Odoo Enterprise v19 &bull; Confidential</p>
+</div>
+
+</body>
+</html>
